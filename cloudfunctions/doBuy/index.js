@@ -131,11 +131,6 @@ function generatePrintContent(order) {
   content += `<LEFT>订单编号: ${escapeHtml(order._id)}</LEFT><BR>`
   content += `<LEFT>下单时间: ${formatDate(date)}</LEFT><BR>`
   
-  // 桌码号（如果有）
-  if (order.tableNumber) {
-    content += `<C><font# bolder=1 height=2 width=2>桌码: ${escapeHtml(order.tableNumber)}</font#></C><BR>`
-  }
-  
   content += `<C>--------------商品--------------</C><BR>`
   
   // 商品列表
@@ -211,6 +206,7 @@ function generatePrintContent(order) {
   content += `<C></C><BR>`
   return content
 }
+
 
 // 打印订单
 async function printOrder(orderId, orderData) {
