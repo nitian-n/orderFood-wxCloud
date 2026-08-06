@@ -147,7 +147,7 @@ function generatePrintContent(order) {
       // 确保价格格式正确，避免小数点0换行
       const price = parseFloat(item.price || 0).toFixed(2)
       // 格式化商品行：商品名称 + 空格填充 + 数量 × 价格
-      // 总宽度32个字符，自动计算空格数（减少1个空格避免价格最后一个0换行）
+      // 总宽度32个字符，自动计算空格数（减少1个空格避免价格最后一个0换行)
       const rightPart = `×${count}  ￥${price}`
       const dishNameWidth = getStringWidth(dishName)
       const rightPartWidth = getStringWidth(rightPart)
@@ -291,20 +291,11 @@ exports.main = async (event, context) => {
       const user = userRes.data[0]
       const currentBalance = user.balance || 0
       const finalOrderType = orderType === 'takeOut' ? 'takeOut' : 'dineIn'
-      const finalTableNumber = String(tableNumber || '').trim()
+      // 强制桌码为1，忽略前端传入的任何值
+      const finalTableNumber = '1'
       const finalRemark = String(remark || '').trim().slice(0, 120)
 
-      if (!finalTableNumber) {
-        throw new Error('下单前请先扫描桌码')
-      }
-
-      const tableCodeRes = await transaction.collection('tableCode').where({
-        tableNumber: finalTableNumber
-      }).limit(1).get()
-
-      if (!tableCodeRes.data || tableCodeRes.data.length === 0) {
-        throw new Error('桌码无效，请重新扫描')
-      }
+      // 不再校验 tableCode 集合；tableNumber 固定为 '1'
 
       if (!Array.isArray(orderGoods) || orderGoods.length === 0) {
         throw new Error('订单商品不能为空')
@@ -396,7 +387,7 @@ exports.main = async (event, context) => {
         userNickName: user.nickName || '',
         userAvatar: user.avatarUrl || '',
         userPhone: user.phoneNumber || '',
-        // 桌码号
+        // 桌码号（已被强制为 '1'）
         tableNumber: finalTableNumber,
         remark: finalRemark
       }
