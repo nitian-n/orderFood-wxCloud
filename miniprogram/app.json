@@ -13,7 +13,6 @@
     "pages/admin/order/order",
     "pages/admin/shopSettings/shopSettings",
     "pages/admin/rechargeOptions/rechargeOptions",
-    "pages/admin/tableCode/tableCode",
     "pages/admin/printer/printer"
   ],
 
