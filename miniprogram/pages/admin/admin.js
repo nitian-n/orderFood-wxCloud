@@ -76,13 +76,6 @@ Page({
     })
   },
 
-  // 桌码管理
-  goToTableCode() {
-    wx.navigateTo({
-      url: '/pages/admin/tableCode/tableCode'
-    })
-  },
-
   // 店铺设置
   goToShopSettings() {
     wx.navigateTo({
