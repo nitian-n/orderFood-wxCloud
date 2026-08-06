@@ -8,11 +8,6 @@ const {
   saveStoredCart
 } = require('../../utils/cart')
 const {
-  isScanCancelled,
-  normalizeTableNumber,
-  scanTableCodeFromCamera
-} = require('../../utils/tableCode')
-const {
   DEFAULT_SHOP_SETTINGS,
   loadShopSettings: fetchShopSettings
 } = require('../../utils/shopSettings')
@@ -76,23 +71,7 @@ Page({
     })
     this.updateCart(getStoredCart())
 
-    if (options.scene) {
-      try {
-        const scene = normalizeTableNumber(options.scene)
-        if (scene) {
-          this.setData({
-            tableNumber: scene
-          })
-          wx.showToast({
-            title: `桌码：${scene}`,
-            icon: 'success',
-            duration: 2000
-          })
-        }
-      } catch (e) {
-        console.error('解析scene参数失败', e)
-      }
-    }
+    // 不再通过 scene 自动绑定桌码，移除桌码相关逻辑
 
     this.loadMenu()
     this.loadUserInfo()
@@ -773,9 +752,6 @@ Page({
     }
 
     const query = [`id=${encodeURIComponent(goods._id)}`]
-    if (this.data.tableNumber) {
-      query.push(`tableNumber=${encodeURIComponent(this.data.tableNumber)}`)
-    }
 
     wx.navigateTo({
       url: `/pages/dish-detail/dish-detail?${query.join('&')}`,
@@ -1121,41 +1097,16 @@ Page({
       return
     }
 
-    if (!this.data.tableNumber) {
-      this.requestTableCodeForSettle()
-      return
-    }
-
+    // 不再强制扫码，直接进入结算
     this.navigateToSettle()
   },
 
-  requestTableCodeForSettle() {
-    wx.showModal({
-      title: '请先扫描桌码',
-      content: '订单需要绑定当前桌码，扫码成功后才能进入订单确认。',
-      confirmText: '去扫码',
-      cancelText: '暂不结算',
-      success: (result) => {
-        if (result.confirm) {
-          this.scanTableCode({
-            settleAfterScan: true
-          })
-        }
-      }
-    })
-  },
-
   navigateToSettle() {
-    if (!this.data.tableNumber) {
-      this.requestTableCodeForSettle()
-      return
-    }
-
     try {
       wx.setStorageSync('settleCartData', {
         cart: this.data.cart,
         totalPrice: this.data.cartTotalPrice,
-        tableNumber: this.data.tableNumber
+        tableNumber: this.data.tableNumber || ''
       })
 
       wx.navigateTo({
@@ -1165,35 +1116,6 @@ Page({
       console.error('跳转结算页面失败', err)
       wx.showToast({
         title: '跳转失败',
-        icon: 'none'
-      })
-    }
-  },
-
-  async scanTableCode(options = {}) {
-    try {
-      const tableNumber = await scanTableCodeFromCamera()
-
-      this.setData({
-        tableNumber
-      }, () => {
-        wx.showToast({
-          title: `已绑定${tableNumber}号桌`,
-          icon: 'success'
-        })
-
-        if (options.settleAfterScan) {
-          this.navigateToSettle()
-        }
-      })
-    } catch (err) {
-      if (isScanCancelled(err)) {
-        return
-      }
-
-      console.error('扫码失败', err)
-      wx.showToast({
-        title: err && err.code === 'INVALID_TABLE_CODE' ? '未能识别桌码' : '扫码失败',
         icon: 'none'
       })
     }
